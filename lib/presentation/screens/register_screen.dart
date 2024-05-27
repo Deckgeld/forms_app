@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forms_app/infrastructure/inputs/inputs.dart';
+import 'package:forms_app/infrastructure/inputs/username.dart';
 import 'package:forms_app/presentation/blocs/register/register_cubit.dart';
 import 'package:forms_app/presentation/widgets/widgets.dart';
 
@@ -45,80 +47,42 @@ class _RegisterView extends StatelessWidget {
   }
 }
 
-class _RegisterForm extends StatefulWidget {
+class _RegisterForm extends StatelessWidget {
 
-  @override
-  State<_RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<_RegisterForm> {
-
-  //Creamos una llave global para el formulario, nos servirá para validar el formulario
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
   @override
   Widget build(BuildContext context) {
     final registerCubit = context.watch<RegisterCubit>();
+    final userName = registerCubit.state.username;
+    final email = registerCubit.state.email;
+    final password = registerCubit.state.password;
 
     return Form(
-      key: _formKey,
       child: Column(
         children: [
           CustomTextFormField(
             label: 'Nombre del usuario',
-            onchange: (value) {
-              registerCubit.usernameChanged(value);
-              _formKey.currentState!.validate();
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'El nombre de usuario es requerido';
-              if (value.trim().isEmpty) return 'El nombre de usuario no puede ser solo espacios';
-              if (value.length < 6) return 'El nombre de usuario debe tener al menos 6 caracteres';
-              return null;
-            },
+            onchange: registerCubit.usernameChanged,
+            errorMessage: userName.errorMessage,
           ),
           const SizedBox(height: 10),
           
           CustomTextFormField(
             label: 'Correo electrónico',
-            onchange: (value) {
-              registerCubit.emailChanged(value);
-              _formKey.currentState!.validate();
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'El nombre de usuario es requerido';
-              if (value.trim().isEmpty) return 'El nombre de usuario no puede ser solo espacios';
-              
-              final emailRegExp = RegExp(
-                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-              );
-              if (!emailRegExp.hasMatch(value)) return 'El correo electrónico no es válido';
-
-              return null;
-            },
+            onchange: registerCubit.emailChanged,
+            errorMessage: email.errorMessage,
           ),
           const SizedBox(height: 10),
 
           CustomTextFormField(
-            label: 'Correo electrónico',
+            label: 'Contraseña',
             obscureText: true,
-            onchange: (value) {
-              registerCubit.passwordChanged(value);
-              _formKey.currentState!.validate();
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'La contraseña es requerida';
-              if (value.trim().isEmpty) return 'La contraseña no puede ser solo espacios';
-              if (value.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
-              return null;
-            },
+            onchange: registerCubit.passwordChanged,
+            errorMessage: password.errorMessage,
           ),
           const SizedBox(height: 20),
 
           FilledButton.tonalIcon(
                 onPressed: () {
-                  //Si el formulario no es válido, no hacemos nada
-                  if (!_formKey.currentState!.validate()) return;
 
                   registerCubit.onSubmitted();
                 }, 
